@@ -9,7 +9,6 @@ local = b'\x00bala'
 remote = b'\x00pyrouted'
 
 call = {'name': 'get_link',
-        'endpoint': local,
         'argv': sys.argv[1:]}
 s = socket(AF_UNIX, SOCK_DGRAM, 0)
 s.bind(local)

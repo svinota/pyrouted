@@ -40,11 +40,12 @@ namespace = Namespace()
 # handle the call
 #
 try:
-    call = json.loads(s.recv(16384))
+    (data, endpoint) = s.recvfrom(16384)
+    call = json.loads(data)
     ret = getattr(namespace, call['name'])(*call.get('argv', []),
                                            **call.get('kwarg', {}))
-    s.connect(call['endpoint'])
-    s.sendto(json.dumps(ret, default=default_encoder), call['endpoint'])
+    s.connect(endpoint)
+    s.sendto(json.dumps(ret, default=default_encoder), endpoint)
 except:
     traceback.print_exc()
 finally:
