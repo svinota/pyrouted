@@ -1,0 +1,52 @@
+#!/usr/bin/python
+
+import json
+import uuid
+import traceback
+from socket import AF_UNIX
+from socket import SOCK_DGRAM
+from socket import socket
+from pyroute2 import IPDB
+
+##
+# create the socket
+#
+s = socket(AF_UNIX, SOCK_DGRAM, 0)
+s.bind(b'\x00pyrouted')
+
+
+##
+# default JSON encoder
+#
+def default_encoder(obj):
+    if isinstance(obj, set):
+        return list(obj)
+    else:
+        raise TypeError()
+
+
+##
+# namespace
+#
+class Namespace(object):
+    def __init__(self):
+        self.ipdb = IPDB()
+
+    def get_link(self, name='lo'):
+        return self.ipdb.interfaces[name]
+
+namespace = Namespace()
+##
+# handle the call
+#
+try:
+    call = json.loads(s.recv(16384))
+    ret = getattr(namespace, call['name'])(*call.get('argv', []),
+                                           **call.get('kwarg', {}))
+    s.connect(call['endpoint'])
+    s.sendto(json.dumps(ret, default=default_encoder), call['endpoint'])
+except:
+    traceback.print_exc()
+finally:
+    namespace.ipdb.release()
+    s.close()
