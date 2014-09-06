@@ -1,0 +1,6 @@
+[Service]
+Environment=@ENVIRON@
+ExecStart=@PYROUTED@
+User=@USER@
+StandardOutput=syslog
+StandardError=syslog
