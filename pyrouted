@@ -1,18 +1,30 @@
 #!/usr/bin/python
 
+import io
+import os
 import json
-import uuid
+import struct
 import traceback
 from socket import AF_UNIX
-from socket import SOCK_DGRAM
+from socket import SOCK_STREAM
+from socket import fromfd
 from socket import socket
 from pyroute2 import IPDB
+from pyroute2.netlink import NLMSG_TRANSPORT
+from pyroute2.netlink import Marshal
+from pyroute2.netlink.generic import cdatamsg
+
 
 ##
 # create the socket
 #
-s = socket(AF_UNIX, SOCK_DGRAM, 0)
-s.bind(b'\x00pyrouted')
+if os.environ.get('LISTEN_PID', None) == str(os.getpid()):
+    s = fromfd(3, AF_UNIX, SOCK_STREAM)
+else:
+    s = socket(AF_UNIX, SOCK_STREAM, 0)
+    s.bind(b'\x00pyrouted')
+    s.listen(16)
+(c, addr) = s.accept()
 
 
 ##
@@ -32,6 +44,9 @@ class Namespace(object):
     def __init__(self):
         self.ipdb = IPDB()
 
+    def get_env(self):
+        return os.environ
+
     def get_link(self, name='lo'):
         return self.ipdb.interfaces[name]
 
@@ -40,14 +55,29 @@ namespace = Namespace()
 # handle the call
 #
 try:
-    (data, endpoint) = s.recvfrom(16384)
-    call = json.loads(data)
+    marshal = Marshal()
+    marshal.msg_map = {NLMSG_TRANSPORT: cdatamsg}
+
+    data = io.BytesIO()
+    data.length = data.write(c.recv(4))
+    length = struct.unpack('I', data.getvalue())[0]
+    data.length += data.write(c.recv(length - 4))
+    msg = marshal.parse(data)[0]
+
+    call = json.loads(msg.get_attr('IPR_ATTR_CDATA'))
     ret = getattr(namespace, call['name'])(*call.get('argv', []),
                                            **call.get('kwarg', {}))
-    s.connect(endpoint)
-    s.sendto(json.dumps(ret, default=default_encoder), endpoint)
+
+    response = cdatamsg()
+    response['header']['type'] = NLMSG_TRANSPORT
+    response['attrs'] = [['IPR_ATTR_CDATA',
+                          json.dumps(ret, default=default_encoder)]]
+    response.encode()
+    c.send(response.buf.getvalue())
 except:
     traceback.print_exc()
 finally:
+    c.close()
     namespace.ipdb.release()
-    s.close()
+    if os.environ.get('LISTEN_PID', None) != str(os.getpid()):
+        s.close()
