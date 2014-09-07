@@ -14,8 +14,9 @@ from pyroute2.netlink.generic import cdatamsg
 local = b'\x00bala'
 remote = b'\x00pyrouted'
 
-call = {'name': 'get_link',
-        'argv': sys.argv[1:]}
+call = {'name': sys.argv[1],
+        'argv': sys.argv[2:]}
+print(call)
 s = socket(AF_UNIX, SOCK_STREAM, 0)
 s.bind(local)
 s.connect(remote)
