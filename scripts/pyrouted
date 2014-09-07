@@ -7,7 +7,6 @@ from socket import AF_UNIX
 from socket import SOCK_STREAM
 from socket import fromfd
 from socket import socket
-from pyroute2 import IPDB
 
 
 ##
@@ -22,33 +21,18 @@ else:
 (c, addr) = s.accept()
 
 
-##
-# namespace
-#
-class Namespace(object):
-    def __init__(self):
-        self.ipdb = IPDB()
-
-    def get_env(self):
-        return dict(os.environ)
-
-    def get_link(self, name='lo'):
-        return self.ipdb.interfaces[name]
-
-namespace = Namespace()
+commands = pyrouted.Commands()
 ##
 # handle the call
 #
 try:
     transport = pyrouted.Transport(sock=c)
     call = transport.get()
-    ret = getattr(namespace, call['name'])(*call.get('argv', []),
-                                           **call.get('kwarg', {}))
-    transport.put(ret)
+    transport.put(commands(call))
 except:
     traceback.print_exc()
 finally:
     c.close()
-    namespace.ipdb.release()
+    commands.ipdb.release()
     if os.environ.get('LISTEN_PID', None) != str(os.getpid()):
         s.close()
