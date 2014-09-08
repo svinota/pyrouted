@@ -11,7 +11,7 @@ BEGIN {
 {
     while (1) {
         # pick one variable
-        variable = gensub(/.*@([^@]*)@.*/,"\\1",1)
+        variable = gensub(/.*%([^%]*)%.*/,"\\1",1)
         # no more variables left
         if (variable == $0) break
         # value lookup:
@@ -23,7 +23,7 @@ BEGIN {
             value = conf[variable]
         }
         # substitute the variable
-        gsub("@"variable"@", value)
+        gsub("%"variable"%", value)
     }
     print $0
 }

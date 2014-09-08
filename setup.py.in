@@ -5,13 +5,13 @@ from distutils.core import setup
 readme = open("README.md", "r")
 
 setup(name='pyrouted',
-      version='@RELEASE@',
+      version='%RELEASE%',
       description='Server-oriented network configuration tool',
       author='Peter V. Saveliev',
       author_email='peter@svinota.eu',
       url='https://github.com/svinota/pyrouted',
       license='GPLv2+',
-      requires=['pyroute2 (>= @REQUIRE_PYROUTE2@)'],
+      requires=['pyroute2 (>= %REQUIRE_PYROUTE2%)'],
       packages=['pyrouted'],
       scripts=['scripts/pyrouted', 'scripts/pyroute-client'],
       data_files=[('/etc/systemd/system/', ['pyrouted.socket',

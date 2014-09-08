@@ -1,2 +1,2 @@
 [Socket]
-ListenStream=@SOCKET@
+ListenStream=%SOCKET%

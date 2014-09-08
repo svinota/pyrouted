@@ -1,6 +1,6 @@
 [Service]
-Environment=@ENVIRON@
-ExecStart=@PYROUTED@
-User=@USER@
+Environment=%ENVIRON%
+ExecStart=%PYROUTED% %SOCKET%
+User=%USER%
 StandardOutput=syslog
 StandardError=syslog
