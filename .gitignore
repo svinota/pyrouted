@@ -2,6 +2,8 @@
 *.pyc
 *~
 build/
+pyrouted.socket
+pyrouted.service
 docs/general.rst
 docs/_build
 tests/htmlcov
