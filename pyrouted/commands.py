@@ -53,10 +53,16 @@ class Namespace(object):
         '''
         Get all the links.
         '''
-        return list(self.ipdb.by_index.values())
+        return [x.dump() for x in self.ipdb.by_index.values()]
 
     def get_link(self, name='lo'):
         '''
         Get one link.
         '''
-        return self.ipdb.interfaces[name]
+        return self.ipdb.interfaces[name].dump()
+
+    def restore(self, name, data):
+        '''
+        Restore link settings from snapshot
+        '''
+        return self.ipdb.interfaces[name].load(data).commit().dump()
