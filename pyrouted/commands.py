@@ -65,4 +65,6 @@ class Namespace(object):
         '''
         Restore link settings from snapshot
         '''
-        return self.ipdb.interfaces[name].load(data).commit().dump()
+        interface = self.ipdb.interfaces[name]
+        interface.commit(transaction=interface.load(data))
+        return interface.dump()
