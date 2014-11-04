@@ -18,11 +18,11 @@
 
 version ?= "0.0"
 release ?= "0.0.1"
-pyroute2 ?= "0.2.15"
+pyroute2 ?= "0.3.2"
 python ?= "python"
 environ ?= ""
-pyrouted ?= "/usr/local/bin/pyrouted"
-socket ?= "@pyrouted"
+pyrouted ?= "/usr/bin/pyrouted"
+socket ?= "3080"
 user ?= "root"
 
 ifdef root

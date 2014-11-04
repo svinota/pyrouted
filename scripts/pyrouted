@@ -8,6 +8,8 @@ import pyrouted
 from socket import AF_INET
 from socket import AF_UNIX
 from socket import SOCK_STREAM
+from socket import SOL_SOCKET
+from socket import SO_REUSEPORT
 from socket import fromfd
 from socket import socket
 
@@ -54,6 +56,7 @@ if os.environ.get('LISTEN_PID', None) == str(os.getpid()):
     s = fromfd(3, family, SOCK_STREAM)
 else:
     s = socket(family, SOCK_STREAM, 0)
+    s.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1)
     s.bind(url)
     s.listen(16)
 (c, addr) = s.accept()
@@ -68,10 +71,12 @@ commands = pyrouted.Commands()
 #
 try:
     transport = pyrouted.Transport(sock=c)
+    transport.is_server = True
     call = transport.get()
     transport.put(commands(call))
-except:
-    traceback.print_exc()
+except Exception as e:
+    transport.put({'error': '%s: %s' % (type(e), str(e)),
+                   'traceback': traceback.format_exc()})
 finally:
     transport.release()
     c.close()
