@@ -59,6 +59,10 @@ class Namespace(object):
         '''
         Get one link.
         '''
+        try:
+            name = int(name)
+        except ValueError:
+            pass
         return self.ipdb.interfaces[name].dump()
 
     def restore(self, name, data):
