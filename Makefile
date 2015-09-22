@@ -18,7 +18,7 @@
 
 version ?= "0.0"
 release ?= "0.0.1"
-pyroute2 ?= "0.3.2"
+pyroute2 ?= "0.3.14"
 python ?= "python"
 pyrouted ?= "/usr/bin/pyrouted"
 
