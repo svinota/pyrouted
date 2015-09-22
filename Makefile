@@ -20,10 +20,7 @@ version ?= "0.0"
 release ?= "0.0.1"
 pyroute2 ?= "0.3.2"
 python ?= "python"
-environ ?= ""
 pyrouted ?= "/usr/bin/pyrouted"
-socket ?= "3080"
-user ?= "root"
 
 ifdef root
 	override root := "--root=${root}"
@@ -57,7 +54,7 @@ clean: clean-version
 	rm -f tests/*crt
 	find . -name "*pyc" -exec rm -f "{}" \;
 
-setup.py docs/conf.py pyrouted.socket pyrouted.service:
+setup.py docs/conf.py pyrouted.socket pyrouted@.service:
 	gawk \
 		-v version=${version} \
 		-v release=${release} \
@@ -72,12 +69,12 @@ setup.py docs/conf.py pyrouted.socket pyrouted.service:
 clean-version:
 	rm -f setup.py
 	rm -f pyrouted.socket
-	rm -f pyrouted.service
+	rm -f pyrouted@.service
 	rm -f docs/conf.py
 
 force-version: clean-version update-version
 
-update-version: setup.py docs/conf.py pyrouted.socket pyrouted.service
+update-version: setup.py docs/conf.py pyrouted.socket pyrouted@.service
 
 docs: clean force-version
 	cp README.md docs/general.rst

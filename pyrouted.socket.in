@@ -1,2 +1,6 @@
 [Socket]
-ListenStream=%SOCKET%
+ListenStream=/var/run/pyrouted.sock
+SocketUser=root
+SocketGroup=wheel
+SocketMode=660
+Accept=true

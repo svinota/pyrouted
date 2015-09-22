@@ -2,17 +2,14 @@
 import sys
 import pyrouted
 from pprint import pprint
-from socket import AF_INET
+from socket import AF_UNIX
 from socket import SOCK_STREAM
 from socket import socket
 
-local = b'\x00bala'
-remote = b'\x00pyrouted'
-
 call = {'name': sys.argv[1],
         'argv': sys.argv[2:]}
-s = socket(AF_INET, SOCK_STREAM, 0)
-s.connect(('127.0.0.1', 3080))
+s = socket(AF_UNIX, SOCK_STREAM, 0)
+s.connect("/var/run/pyrouted.sock")
 
 transport = pyrouted.Transport(sock=s)
 transport.put(call)

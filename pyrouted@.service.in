@@ -1,0 +1,6 @@
+[Service]
+ExecStart=/usr/bin/python %PYROUTED% /var/run/pyrouted.sock
+User=root
+CapabilityBoundingSet=CAP_NET_ADMIN
+StandardOutput=syslog
+StandardError=syslog
