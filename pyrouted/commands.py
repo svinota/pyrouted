@@ -1,4 +1,5 @@
 import os
+import json
 from pyroute2 import IPDB
 from types import MethodType
 
@@ -53,7 +54,7 @@ class Namespace(object):
         '''
         Get all the links.
         '''
-        return [x.dump() for x in self.ipdb.by_index.values()]
+        return [json.dumps(x.dump()) for x in self.ipdb.by_index.values()]
 
     def get_link(self, name='lo'):
         '''
@@ -63,12 +64,13 @@ class Namespace(object):
             name = int(name)
         except ValueError:
             pass
-        return self.ipdb.interfaces[name].dump()
+        return json.dumps(self.ipdb.interfaces[name].dump())
 
     def restore(self, name, data):
         '''
         Restore link settings from snapshot
         '''
         interface = self.ipdb.interfaces[name]
-        interface.commit(transaction=interface.load(data))
-        return interface.dump()
+        interface.load(json.loads(data))
+        interface.commit()
+        return json.dumps(interface.dump())
