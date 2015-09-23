@@ -66,6 +66,18 @@ class Namespace(object):
             pass
         return json.dumps(self.ipdb.interfaces[name].dump())
 
+    def set_link_up(self, name):
+        '''
+        Set interface UP
+        '''
+        return json.dumps(self.ipdb.interfaces[name].up().commit().dump())
+
+    def set_link_down(self, name):
+        '''
+        Set interface DOWN
+        '''
+        return json.dumps(self.ipdb.interfaces[name].down().commit().dump())
+
     def restore(self, name, data):
         '''
         Restore link settings from snapshot
