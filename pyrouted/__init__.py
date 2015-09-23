@@ -83,7 +83,7 @@ class Transport(object):
 
     def put(self, data):
         '''
-        Marshal provided data end send it to the stream.
+        Marshal the provided data and send to the stream.
         '''
         data = self.dumps(data)
         if self.is_server:
