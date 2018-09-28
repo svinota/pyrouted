@@ -1,0 +1,97 @@
+#!/usr/bin/env python
+
+import json
+import bottle
+from ndb.config import Config
+from ndb.http import Server
+from pyroute2 import RemoteIPRoute
+from pyroute2 import NDB
+
+
+@bottle.get('/sources/list/<mode>')
+def api_sources(mode='short'):
+    global ndb
+    ret = {}
+    for name, spec in ndb.sources.items():
+        ret[name] = {'class': spec.nl.__class__.__name__,
+                     'status': spec.status}
+        if mode == 'full':
+            ret[name]['config'] = spec.nl_kwarg
+    return bottle.template('{{!ret}}', ret=json.dumps(ret, indent=3))
+
+
+@bottle.post('/sources/add')
+def api_sources_add():
+    global config
+    global ndb
+    data = bottle.request.body.getvalue().decode('utf-8')
+    node, spec = make_spec(data)
+    config['nodes'].append(node)
+    ndb.connect_source(node, spec)
+
+
+@bottle.post('/sources/del')
+def api_sources_del():
+    global config
+    global ndb
+    node = bottle.request.body.getvalue().decode('utf-8')
+    config['nodes'].remove(node)
+    ndb.disconnect_source(node)
+
+
+@bottle.get('/config')
+def api_config():
+    global config
+    return bottle.template('{{!ret}}', ret=json.dumps(config, indent=3))
+
+
+@bottle.post('/config/dump')
+def api_config_dump():
+    global config
+    path = bottle.request.body.getvalue().decode('utf-8')
+    config.dump(path)
+
+
+@bottle.get('/list/<name>')
+def api_list(name='interfaces'):
+    global ndb
+    assert name in ('interfaces',
+                    'addresses',
+                    'routes',
+                    'neighbours',
+                    'vlans',
+                    'bridges')
+    ret = []
+    obj = getattr(ndb, name)
+    for line in obj.dump():
+        ret.append(line)
+    return bottle.template('{{!ret}}', ret=json.dumps(ret, indent=3))
+
+
+def make_spec(node):
+    if '@' in node:
+        username, node = node.split('@')
+    else:
+        username = config['user']
+    return (node, {'class': RemoteIPRoute,
+                   'persistent': False,
+                   'protocol': 'ssh',
+                   'hostname': node,
+                   'username': username,
+                   'check_host_keys': 'ignore'})
+
+
+config = Config().load()
+sources = {}
+for node in config['sources']:
+    node, spec = make_spec(node)
+    sources[node] = spec
+
+ndb = NDB(sources=sources,
+          db_provider=config['database']['provider'],
+          db_spec=config['database']['spec'])
+
+try:
+    bottle.run(server=Server())
+finally:
+    ndb.close()
