@@ -33,7 +33,7 @@ class HTTPHandler(WSGIRequestHandler):
 class Server(bottle.ServerAdapter):
     quiet = False
 
-    def __init__(self, family=socket.AF_UNIX, host='/tmp/ndb', port=0):
+    def __init__(self, family=socket.AF_UNIX, host='/var/run/pyrouted/api', port=0):
         self.options = {}
         self.host = host
         self.port = port

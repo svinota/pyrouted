@@ -6,8 +6,8 @@ class Config(dict):
 
     version = 1
 
-    def __init__(self, path='/etc/ndb.conf'):
-        self.path = os.environ.get('NDB_CONFIG', path)
+    def __init__(self, path='/etc/pyrouted/pyrouted.conf'):
+        self.path = os.environ.get('PYROUTED_CONFIG', path)
 
     def load(self):
         with open(self.path, 'r') as f:
