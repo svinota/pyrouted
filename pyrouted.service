@@ -1,0 +1,15 @@
+[Unit]
+Description=network database
+After=network.target
+
+[Service]
+Type=idle
+ExecStart=/usr/bin/pyrouted
+RuntimeDirectory=pyrouted
+RuntimeDirectoryPreserve=no
+StandardOutput=journal
+Restart=always
+User=nginx
+
+[Install]
+WantedBy=multi-user.target
