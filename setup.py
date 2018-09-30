@@ -5,7 +5,7 @@ readme = open("README.md", "r")
 
 
 setup(name='pyrouted',
-      version='0.2.2',
+      version='0.2.3',
       description='Python Network Database',
       author='Peter V. Saveliev',
       author_email='peter@svinota.eu',
