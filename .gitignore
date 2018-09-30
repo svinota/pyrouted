@@ -3,7 +3,6 @@
 *~
 build/
 pyrouted.socket
-pyrouted.service
 docs/general.rst
 docs/_build
 tests/htmlcov
@@ -12,6 +11,5 @@ tests/.coverage
 tests/*key
 tests/*crt
 output.html
-setup.py
 docs/conf.py
 docs/changelog.rst
