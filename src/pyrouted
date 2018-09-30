@@ -1,111 +1,31 @@
 #!/usr/bin/env python
 
-import json
 import socket
 import bottle
 from pyrouted.config import Config
 from pyrouted.http import Server
-from pyroute2 import RemoteIPRoute
+from pyrouted.api import APIv1
+from pyrouted.util import make_spec
 from pyroute2 import NDB
 from pyroute2 import IPRoute
-
-
-@bottle.get('/sources/list/<mode>')
-def api_sources(mode='short'):
-    global ndb
-    ret = {}
-    for name, spec in ndb.sources.items():
-        ret[name] = {'class': spec.nl.__class__.__name__,
-                     'status': spec.status}
-        if mode == 'full':
-            ret[name]['config'] = spec.nl_kwarg
-    return bottle.template('{{!ret}}', ret=json.dumps(ret))
-
-
-@bottle.post('/sources/add')
-def api_sources_add():
-    global config
-    global ndb
-    data = bottle.request.body.getvalue().decode('utf-8')
-    node, spec = make_spec(data)
-    config['sources'].append(node)
-    ndb.connect_source(node, spec)
-
-
-@bottle.post('/sources/del')
-def api_sources_del():
-    global config
-    global ndb
-    node = bottle.request.body.getvalue().decode('utf-8')
-    config['sources'].remove(node)
-    ndb.disconnect_source(node)
-
-
-@bottle.get('/config')
-def api_config():
-    global config
-    return bottle.template('{{!ret}}', ret=json.dumps(config))
-
-
-@bottle.post('/config/dump')
-def api_config_dump():
-    global config
-    path = bottle.request.body.getvalue().decode('utf-8')
-    config.dump(path)
-
-
-@bottle.get('/list/<name>')
-def api_list(name):
-    global ndb
-    assert name in ('interfaces',
-                    'addresses',
-                    'routes',
-                    'neighbours',
-                    'vlans',
-                    'bridges')
-    ret = []
-    obj = getattr(ndb, name)
-    for line in obj.dump():
-        ret.append(line)
-    return bottle.template('{{!ret}}', ret=json.dumps(ret))
-
-
-@bottle.get('/query/<name>')
-def api_query(name):
-    global ndb
-    assert name in ('nodes',
-                    'p2p_edges',
-                    'l2_edges',
-                    'l3_edges')
-    ret = []
-    obj = getattr(ndb.query, name)
-    for line in obj():
-        ret.append(line)
-    return bottle.template('{{!ret}}', ret=json.dumps(ret))
-
-def make_spec(node):
-    if '@' in node:
-        username, node = node.split('@')
-    else:
-        username = config['user']
-    return (node, {'class': RemoteIPRoute,
-                   'persistent': False,
-                   'protocol': 'ssh',
-                   'hostname': node,
-                   'username': username,
-                   'identity_file': config['ssh_key'],
-                   'check_host_keys': 'ignore'})
 
 
 config = Config().load()
 sources = {'localhost': {'class': IPRoute}}
 for node in config['sources']:
-    node, spec = make_spec(node)
+    node, spec = make_spec(node, config)
     sources[node] = spec
 
 ndb = NDB(sources=sources,
           db_provider=config['database']['provider'],
           db_spec=config['database']['spec'])
+
+app = APIv1(ndb, config)
+for kw in dir(app):
+    method = getattr(app, kw)
+    if hasattr(method, 'http_route'):
+        path = '%s%s' % (app.prefix, method.http_route)
+        bottle.route(path, method.http_method, method)
 
 try:
     listen = config.get('listen', '/var/run/pyrouted/api')
