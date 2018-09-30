@@ -3,13 +3,14 @@ from pyroute2 import RemoteIPRoute
 
 def make_spec(node, config):
     if '@' in node:
-        username, node = node.split('@')
+        username, hostname = node.split('@')
     else:
-        username = config['user']
+        username = config['ssh_user']
+        hostname = node
     return (node, {'class': RemoteIPRoute,
                    'persistent': False,
                    'protocol': 'ssh',
-                   'hostname': node,
+                   'hostname': hostname,
                    'username': username,
                    'identity_file': config['ssh_key'],
                    'check_host_keys': 'ignore'})
