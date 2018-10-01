@@ -22,6 +22,7 @@ class APIv1(object):
     @route('GET', '/sources')
     def sources_list(self, mode='short'):
         ret = {}
+        mode = bottle.request.query.mode or mode
         for name, spec in self.ndb.sources.items():
             ret[name] = {'class': spec.nl.__class__.__name__,
                          'status': spec.status}
