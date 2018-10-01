@@ -9,7 +9,7 @@ RuntimeDirectory=pyrouted
 RuntimeDirectoryPreserve=no
 StandardOutput=journal
 Restart=always
-User=nginx
+User=nobody
 
 [Install]
 WantedBy=multi-user.target
