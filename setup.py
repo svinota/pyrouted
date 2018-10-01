@@ -5,7 +5,7 @@ readme = open("README.md", "r")
 
 
 setup(name='pyrouted',
-      version='0.2.3',
+      version='0.2.4',
       description='Python Network Database',
       author='Peter V. Saveliev',
       author_email='peter@svinota.eu',
@@ -13,6 +13,7 @@ setup(name='pyrouted',
       license='dual license GPLv2+ and Apache v2',
       packages=['pyrouted', ],
       install_requires=['bottle',
+                        'mitogen',
                         'pyroute2 >= 0.5.3'],
       scripts=['src/pyrouted'],
       data_files=[('/lib/systemd/system', ['pyrouted.service', ]),
