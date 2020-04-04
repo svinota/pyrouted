@@ -1,5 +1,7 @@
 **This project is obsoleted by pyroute2-cli utility, see pyroute2 project**
 
+https://github.com/svinota/pyroute2
+
 # pyrouted
 
 Pyroute2 network database: system service
